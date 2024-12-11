@@ -14,14 +14,9 @@ with open(input_path, 'r') as file:
         column1.append(num1)
         column2.append(num2)
 
-# Sort both lists
-column1.sort()
-column2.sort()
+similarity = 0
 
-distance = 0
+for i in column1:
+    similarity += column2.count(i) * i
 
-# Compare elements
-for i in range(len(column1)):
-    distance += abs(column1[i]-column2[i])
-
-print(f"distance between the two lists: {distance}")    
+print(f"similarity score = {similarity}")
