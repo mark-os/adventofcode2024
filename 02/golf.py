@@ -1,32 +1,13 @@
-import os
 
-
-def calculate_safe(nums):
-    pairs = list(zip(nums, nums[1:]))
-    if not pairs:  # Handle lists with 0 or 1 elements
-        return True
-    directions = [b > a for a, b in pairs]
-    diffs = [abs(b - a) for a, b in pairs]
-    return all(0 < d <= 3 for d in diffs) and all(d1 == d2 for d1, d2 in zip(directions, directions[1:]))
+def calculate_safe(n):
+ if len(n)<2:return 1
+ d=[b-a for a,b in zip(n,n[1:])]
+ return all(0<abs(x)<=3 for x in d)and all(x*d[0]>0 for x in d)
 
 def process_reports():
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    input_path = os.path.join(script_dir, 'input')
-    with open(input_path, 'r') as file:
-        original_safe_reports = 0
-        dampened_safe_reports = 0
-        for line in file:
-            numbers = list(map(int, line.strip().split()))
-            if calculate_safe(numbers):
-                original_safe_reports += 1
-                dampened_safe_reports += 1
-                continue
-            for i in range(len(numbers)):
-                test = numbers.copy()
-                test.pop(i)
-                if calculate_safe(test):
-                    dampened_safe_reports += 1
-                    break
-
-    return {"part1": original_safe_reports, "part2": dampened_safe_reports}
+ with open(__file__[:-7]+'input')as f:
+  n=[list(map(int,l.split()))for l in f]
+  a=sum(calculate_safe(x)for x in n)
+  b=a+sum(any(calculate_safe(x[:i]+x[i+1:])for i in range(len(x)))for x in n if not calculate_safe(x))
+  return{"part1":a,"part2":b}
 
