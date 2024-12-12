@@ -1,13 +1,3 @@
-
-def calculate_safe(n):
- if len(n)<2:return 1
- d=[b-a for a,b in zip(n,n[1:])]
- return all(0<abs(x)<=3 for x in d)and all(x*d[0]>0 for x in d)
-
-def process_reports():
- with open(__file__[:-7]+'input')as f:
-  n=[list(map(int,l.split()))for l in f]
-  a=sum(calculate_safe(x)for x in n)
-  b=a+sum(any(calculate_safe(x[:i]+x[i+1:])for i in range(len(x)))for x in n if not calculate_safe(x))
-  return{"part1":a,"part2":b}
+c=lambda l:len(l)<2or all(0<abs(b-a)<4and(b-a)*(l[1]-l[0])>0for a,b in zip(l,l[1:]))
+def process_reports():n=[*map(lambda l:list(map(int,l.split())),open(__file__[:-7]+'input'))];return{"part1":(r:=sum(c(x)for x in n)),"part2":r+sum(any(c(x[:i]+x[i+1:])for i in range(len(x)))for x in n if not c(x))}
 

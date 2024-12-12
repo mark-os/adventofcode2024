@@ -1,5 +1,7 @@
 import golf
 import reporting
+import sys
+print(sys.version)
 
 def test_both_implementations():
     expected = {"part1": 564, "part2": 604}
