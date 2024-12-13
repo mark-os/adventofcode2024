@@ -8,17 +8,12 @@ input_path = os.path.join(script_dir, 'input')
 def create_graph(rules, numbers):
     # Create adjacency list representation
     graph = defaultdict(list)
-    # Add all numbers as nodes even if they don't have edges
-    all_nodes = set(numbers)
-    
     for before, after in rules:
         if before in numbers and after in numbers:
             graph[before].append(after)
-            all_nodes.add(before)
-            all_nodes.add(after)
-    return graph, all_nodes
+    return graph
 
-def topological_sort(graph, all_nodes):
+def topological_sort(graph, numbers):
     # Keep track of visited nodes
     visited = set()
     # Keep track of nodes in current recursion stack
@@ -28,30 +23,26 @@ def topological_sort(graph, all_nodes):
     
     def visit(node):
         if node in temp:
-            # Cycle detected
             return False
         if node in visited:
             return True
             
         temp.add(node)
-        
-        # Visit all neighbors
         for neighbor in graph[node]:
             if not visit(neighbor):
                 return False
-                
         temp.remove(node)
         visited.add(node)
         order.append(node)
         return True
     
-    # Visit all nodes
-    for node in all_nodes:
+    # Visit all nodes from the original list
+    for node in numbers:
         if node not in visited:
             if not visit(node):
-                return None  # Return None if there's a cycle
+                return None
     
-    return order[::-1]  # Reverse to get correct order
+    return order[::-1]
 
 def is_valid_order(lst, rules):
     for a, b in rules:
@@ -112,8 +103,8 @@ with open(input_path, 'r') as file:
         else:
             print(f"{l} failed rules, trying topological sort...")
             # Part 2 - find valid ordering using topological sort
-            graph, nodes = create_graph(rules, l)
-            ordered = topological_sort(graph, nodes)
+            graph = create_graph(rules, l)
+            ordered = topological_sort(graph, l)
             if ordered is not None:
                 # Fill in any missing numbers that weren't in rules
                 missing = [x for x in l if x not in ordered]
