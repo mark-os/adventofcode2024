@@ -8,21 +8,20 @@ def find_loop_positions(themap, initial_walker):
     """Find all positions that, when treated as walls, create loops in the path."""
     loop_positions = []
     
-    # Extract unique positions from initial walk's states
-    initial_states = initial_walker.visited_states
-    test_positions = {(state >> 10, (state >> 2) & 0xFF) for state in initial_states}
-    
     # Test each visited position
-    for r, c in test_positions:
+    for r, c in {(state[0], state[1]) for state in initial_walker.visited_states}:
         if themap[r][c] == '.':
             # Create new map with test position as wall
             test_map = [row[:] for row in themap]
             test_map[r][c] = '#'
             walker = MapWalker(test_map)
             
-            # If walking creates a loop, add position
-            if walker.walk() is False:
-                loop_positions.append((r, c))
+            # Create a walker with the test position
+            try:
+                if walker.walk() is False:
+                    loop_positions.append((r, c))
+            except RuntimeError:
+                continue  # Skip positions that cause too many steps
                 
     return loop_positions
 

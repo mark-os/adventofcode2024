@@ -8,21 +8,21 @@ class MapWalker:
     
     TURN_RIGHT = {'<': '^', '^': '>', '>': 'v', 'v': '<'}
 
-    def get_next_position(self, curr_row, curr_col, curr_dir, test_pos=None):
-        """Returns (next_row, next_col, next_dir, hit_wall)"""
+    def get_next_position(self, curr_row, curr_col, curr_dir):
+        """Returns (next_row, next_col, next_dir, hit_wall, out_of_bounds)"""
         dr, dc = self.DIRECTIONS[curr_dir]
         next_row = curr_row + dr
         next_col = curr_col + dc
         
-        # Check boundaries - if we're about to leave the map, return that position
-        if not (0 <= next_row < self.height and 0 <= next_col < self.width):
-            return next_row, next_col, curr_dir, False
+        # Check boundaries first
+        if next_row < 0 or next_row >= self.height or next_col < 0 or next_col >= self.width:
+            return next_row, next_col, curr_dir, False, True
             
-        # Check for wall or test position
-        if (test_pos and (next_row, next_col) == test_pos) or self.map[next_row][next_col] == '#':
-            return curr_row, curr_col, self.TURN_RIGHT[curr_dir], True
+        # Check for wall
+        if self.map[next_row][next_col] == '#':
+            return curr_row, curr_col, self.TURN_RIGHT[curr_dir], True, False
             
-        return next_row, next_col, curr_dir, False
+        return next_row, next_col, curr_dir, False, False
 
     def __init__(self, themap):
         self.map = themap
@@ -38,10 +38,7 @@ class MapWalker:
                     return (r, c)
         raise ValueError("No start position found")
 
-    def _make_state_key(self, row, col, direction):
-        # Encode position and direction into a single integer
-        dir_val = {'^': 0, '>': 1, 'v': 2, '<': 3}[direction]
-        return (row << 10) | (col << 2) | dir_val
+
 
     def walk(self):
         """Walk the map from the starting position.
@@ -60,27 +57,24 @@ class MapWalker:
         max_steps = self.height * self.width * 4
         
         while steps < max_steps:
-            state = self._make_state_key(curr_row, curr_col, curr_dir)
+            state = (curr_row, curr_col, curr_dir)
             
             if state in self.visited_states:
                 return False
                 
             self.visited_states.add(state)
-            next_row, next_col, next_dir, hit_wall = self.get_next_position(curr_row, curr_col, curr_dir)
+            next_row, next_col, next_dir, hit_wall, out_of_bounds = self.get_next_position(curr_row, curr_col, curr_dir)
             
-            if not (0 <= next_row < self.height and 0 <= next_col < self.width):
-                # Count unique positions from states
-                unique_positions = {(state >> 10, (state >> 2) & 0xFF) for state in self.visited_states}
+            if out_of_bounds:
+                # Count unique positions from states - just take row,col from the (row,col,dir) tuples
+                unique_positions = {(state[0], state[1]) for state in self.visited_states}
                 return len(unique_positions)
                 
             if hit_wall:
                 curr_dir = next_dir
-                self.map[curr_row][curr_col] = curr_dir
             else:
-                self.map[curr_row][curr_col] = '.'
                 curr_row, curr_col = next_row, next_col
                 curr_dir = next_dir
-                self.map[curr_row][curr_col] = curr_dir
             
             steps += 1
             
