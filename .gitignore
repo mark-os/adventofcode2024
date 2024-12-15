@@ -2,3 +2,6 @@
 .env
 __pycache__
 poetry.lock
+
+/target/
+Cargo.lock
