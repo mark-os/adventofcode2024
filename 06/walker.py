@@ -29,6 +29,7 @@ class MapWalker:
         self.height = len(themap)
         self.width = len(themap[0])
         self.start_pos = self._find_start()
+        self.visited_states = set()
         
     def _find_start(self):
         for r in range(self.height):
@@ -54,22 +55,22 @@ class MapWalker:
         """
         curr_row, curr_col = self.start_pos
         curr_dir = self.map[curr_row][curr_col]
-        visited_states = set()
+        self.visited_states.clear()
         steps = 0
         max_steps = self.height * self.width * 4
         
         while steps < max_steps:
             state = self._make_state_key(curr_row, curr_col, curr_dir)
             
-            if state in visited_states:
+            if state in self.visited_states:
                 return False
                 
-            visited_states.add(state)
+            self.visited_states.add(state)
             next_row, next_col, next_dir, hit_wall = self.get_next_position(curr_row, curr_col, curr_dir)
             
             if not (0 <= next_row < self.height and 0 <= next_col < self.width):
                 # Count unique positions from states
-                unique_positions = {(state >> 10, (state >> 2) & 0xFF) for state in visited_states}
+                unique_positions = {(state >> 10, (state >> 2) & 0xFF) for state in self.visited_states}
                 return len(unique_positions)
                 
             if hit_wall:

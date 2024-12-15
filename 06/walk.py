@@ -1,9 +1,30 @@
 import os
 from walker import MapWalker
-from loop_detector import LoopDetector
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 input_path = os.path.join(script_dir, 'input')
+
+def find_loop_positions(themap, initial_walker):
+    """Find all positions that, when treated as walls, create loops in the path."""
+    loop_positions = []
+    
+    # Extract unique positions from initial walk's states
+    initial_states = initial_walker.visited_states
+    test_positions = {(state >> 10, (state >> 2) & 0xFF) for state in initial_states}
+    
+    # Test each visited position
+    for r, c in test_positions:
+        if themap[r][c] == '.':
+            # Create new map with test position as wall
+            test_map = [row[:] for row in themap]
+            test_map[r][c] = '#'
+            walker = MapWalker(test_map)
+            
+            # If walking creates a loop, add position
+            if walker.walk() is False:
+                loop_positions.append((r, c))
+                
+    return loop_positions
 
 def main():
     with open(input_path, 'r') as file:
@@ -15,8 +36,7 @@ def main():
         print(f"Visited positions: {visited_count}")
         
         # Part 2: Find loop positions
-        detector = LoopDetector(themap)
-        loop_positions = detector.find_loop_positions()
+        loop_positions = find_loop_positions(themap, walker)
         print(f"Number of loop positions: {len(loop_positions)}")
 
 if __name__ == '__main__':
