@@ -3,5 +3,5 @@
 __pycache__
 poetry.lock
 
-/target/
+**/target/
 Cargo.lock

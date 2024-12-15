@@ -74,28 +74,28 @@ impl MapWalker {
         (Some((next_row, next_col)), curr_dir, false, false)
     }
 
-    pub fn walk(&self) -> Result<Option<usize>, String> {
+    pub fn walk(&mut self) -> Result<Option<usize>, String> {
         let mut curr_pos = self.start_pos;
         let mut curr_dir = self.map[curr_pos.0][curr_pos.1];
-        let mut visited_states = HashSet::new();
+        self.visited_states.clear();
         let max_steps = self.height * self.width * 4;
         let mut steps = 0;
 
         while steps < max_steps {
             let state = (curr_pos.0, curr_pos.1, curr_dir);
             
-            if visited_states.contains(&state) {
+            if self.visited_states.contains(&state) {
                 return Ok(None);
             }
             
-            visited_states.insert(state);
+            self.visited_states.insert(state);
             
             let (next_pos, next_dir, hit_wall, out_of_bounds) = 
                 self.get_next_position(curr_pos.0, curr_pos.1, curr_dir);
             
             if out_of_bounds {
                 let unique_positions: HashSet<(usize, usize)> = 
-                    visited_states.iter().map(|&(r, c, _)| (r, c)).collect();
+                    self.visited_states.iter().map(|&(r, c, _)| (r, c)).collect();
                 return Ok(Some(unique_positions.len()));
             }
             

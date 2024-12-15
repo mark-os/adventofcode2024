@@ -13,7 +13,7 @@ fn find_loop_positions(map: &Vec<Vec<char>>, initial_walker: &MapWalker) -> Vec<
             // Create new map with test position as wall
             let mut test_map = map.clone();
             test_map[r][c] = '#';
-            let walker = MapWalker::new(&test_map);
+            let mut walker = MapWalker::new(&test_map);
 
             // Test if this position creates a loop
             match walker.walk() {
@@ -36,7 +36,7 @@ fn main() {
         .collect();
 
     // Part 1: Walk the map
-    let walker = MapWalker::new(&map);
+    let mut walker = MapWalker::new(&map);
     match walker.walk() {
         Ok(Some(count)) => println!("Visited positions: {}", count),
         Ok(None) => println!("Found a loop!"),
