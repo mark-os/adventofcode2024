@@ -8,6 +8,22 @@ class MapWalker:
     
     TURN_RIGHT = {'<': '^', '^': '>', '>': 'v', 'v': '<'}
 
+    def get_next_position(self, curr_row, curr_col, curr_dir, test_pos=None):
+        """Returns (next_row, next_col, next_dir, hit_wall)"""
+        dr, dc = self.DIRECTIONS[curr_dir]
+        next_row = curr_row + dr
+        next_col = curr_col + dc
+        
+        # Check boundaries - if we're about to leave the map, return that position
+        if not (0 <= next_row < self.height and 0 <= next_col < self.width):
+            return next_row, next_col, curr_dir, False
+            
+        # Check for wall or test position
+        if (test_pos and (next_row, next_col) == test_pos) or self.map[next_row][next_col] == '#':
+            return curr_row, curr_col, self.TURN_RIGHT[curr_dir], True
+            
+        return next_row, next_col, curr_dir, False
+
     def __init__(self, themap):
         self.map = themap
         self.height = len(themap)
@@ -25,21 +41,29 @@ class MapWalker:
         curr_row, curr_col = self.start_pos
         curr_dir = self.map[curr_row][curr_col]
         visited = {(curr_row, curr_col)}
+        steps = 0
+        max_steps = self.height * self.width * 4
         
-        while True:
-            dr, dc = self.DIRECTIONS[curr_dir]
-            next_row, next_col = curr_row + dr, curr_col + dc
+        
+        while steps < max_steps:
+            next_row, next_col, next_dir, hit_wall = self.get_next_position(curr_row, curr_col, curr_dir)
             
+            # If next position is outside map, we're done
             if not (0 <= next_row < self.height and 0 <= next_col < self.width):
                 break
                 
-            if self.map[next_row][next_col] == '#':
-                curr_dir = self.TURN_RIGHT[curr_dir]
+            if hit_wall:
+                curr_dir = next_dir
                 self.map[curr_row][curr_col] = curr_dir
             else:
                 self.map[curr_row][curr_col] = '.'
                 curr_row, curr_col = next_row, next_col
+                curr_dir = next_dir
                 self.map[curr_row][curr_col] = curr_dir
                 visited.add((curr_row, curr_col))
-                
+            
+            steps += 1
+            
+        if steps >= max_steps:
+            return len(visited)
         return len(visited)

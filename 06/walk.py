@@ -5,15 +5,7 @@ from loop_detector import LoopDetector
 script_dir = os.path.dirname(os.path.abspath(__file__))
 input_path = os.path.join(script_dir, 'input')
 
-def print_map(themap):
-    """Print the current state of the map."""
-    for r in range(len(themap)):
-        for c in range(len(themap[0])):
-            print(themap[r][c], end='')
-        print()  # New line after each row
-    print()  # Blank line after map
-
-if __name__ == '__main__':
+def main():
     with open(input_path, 'r') as file:
         themap = [list(line.strip()) for line in file if line.strip()]
         
@@ -27,4 +19,6 @@ if __name__ == '__main__':
         loop_positions = detector.find_loop_positions()
         print(f"Number of loop positions: {len(loop_positions)}")
 
+if __name__ == '__main__':
+    main()
 
